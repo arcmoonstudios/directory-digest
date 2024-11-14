@@ -1,185 +1,51 @@
-# .gitignore
-
 # VS Code Extension Development
 .vscode-test/
 *.vsix
-out/
-dist/
 
-# Dependency directories
+# Dependencies
 node_modules/
-jspm_packages/
-bower_components/
 
 # Build outputs
-build/
 dist/
-out/
-lib/
-bin/
-target/
-*.tsbuildinfo
 
-# Logs and databases
+# Logs
 *.log
-extension.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
-*.sqlite
-*.sqlite3
-*.db
 
-# Cache directories
-.npm/
-.eslintcache
-.stylelintcache
-.node_repl_history
-.yarn-integrity
-.cache/
-.parcel-cache/
-.next/
-.nuxt/
-.vuepress/dist
-.temp/
-.docusaurus
-.serverless/
-.fusebox/
-.dynamodb/
-.tern-port
-.idea/
-.vs/
-.vscode/
-*.swp
-*.swo
+# OS
 .DS_Store
 Thumbs.db
-.sass-cache/
-*.css.map
-*.sass.map
-*.scss.map
 
-# Test coverage
+# Test
+out/test/**
 coverage/
-.nyc_output/
-*.lcov
-lib-cov/
-*.pid
-*.seed
-*.pid.lock
-
-# Compiled binary addons
-build/Release/
-*.node
 
 # TypeScript
-*.tsbuildinfo
-*.js.map
-*.css.map
-*.sass.map
-*.scss.map
-
-# Yarn / npm
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
-.pnp.*
-package-lock.json
-yarn.lock
-
-# Editor directories and files
-.idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-.project
-.classpath
-.settings/
-*.sublime-workspace
-*.sublime-project
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-
-# Debug files
-*.stackdump
-*.log.*
-*.debug
-
-# Crash reports
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
-
-# Runtime data
-pids/
-*.pid
-*.seed
-*.pid.lock
-
-# Windows specific
-*.cab
-*.msi
-*.msix
-*.msm
-*.msp
-*.lnk
-
-# Linux specific
-*~
-.fuse_hidden*
-.directory
-.Trash-*
-.nfs*
-
-# Temporary files
-*.tmp
-*.temp
-*.bak
-*~.nib
-
-# Compiled source
-*.com
-*.class
-*.dll
-*.exe
-*.o
-*.so
-*.dylib
-*.lib
-*.obj
-*.apk
-*.dex
-
-# Packages
-*.7z
-*.dmg
-*.gz
-*.iso
-*.jar
-*.rar
-*.tar
-*.zip
-*.tgz
-
-# Others
-.env.*
-!.env.example
-.vercel
-.now
-*.pem
-test/test-fixtures/**/0L/
+**/*.map# VS Code Extension Development
 .vscode-test/
+*.vsix
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+out/test/**
+coverage/
+
+# TypeScript
+**/*.map

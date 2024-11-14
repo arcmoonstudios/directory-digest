@@ -1,72 +1,104 @@
 # Directory Digest
 
-![LordXyn](https://tinypic.host/images/2024/09/30/LordXyn.jpeg)s
+Directory Digest is a Visual Studio Code extension that adds powerful directory content management capabilities. It allows you to combine text files within a directory into a single digest file or create an organized structure of your directory contents—all with just three clicks.
 
-`directory-digest` is a VS Code extension designed to generate digest files from the contents of directories. It can append the combined content of text files within a directory to a new file or recursively process all files in a directory structure. This can be especially useful for creating summaries or backups of directory contents.
+![LordXyn](https://tinypic.host/images/2024/09/30/LordXyn.jpeg)
 
 ## Features
 
-### Single Directory Processing
-- **Command**: `Append content to file`
-- **Description**: Appends the content of all text files within a selected directory into a new file named after the directory (e.g., `MyDirectory.txt`). Non-text files and specified directories are excluded.
-  
-### Recursive Directory Processing
-- **Command**: `Append all to 0L`
-- **Description**: Recursively processes all subdirectories and files within a selected directory, creating a tree structure file and saving the directory contents to an organized output directory (`0L`). This command supports progress tracking and cancellation.
+### Combine Files
 
-### Logging
-- This extension uses **winston** logging for tracking processes, with logs saved to `extension.log`.
+**Description:** Appends the content of all text files within a selected directory (recursively) into a new file named after the directory (e.g., `MyDirectory.txt`). Non-text files and specified directories are excluded.
+
+**How to Use:**
+
+1. Left-click to select a directory in the Explorer pane.
+2. Right-click to open the context menu.
+3. Left-click on "Directory Digest: Combine Files".
+
+### Create 0L Structure
+
+**Description:** Recursively processes all subdirectories and files within a selected directory, creating a tree structure file and saving the directory contents to an organized output directory (`0L`).
+
+**How to Use:**
+
+1. Left-click to select a directory in the Explorer pane.
+2. Right-click to open the context menu.
+3. Left-click on "Directory Digest: Create 0L Structure".
+
+## Logging
+
+Uses `winston` for logging, with logs saved to `extension.log` in the workspace directory.
 
 ## Requirements
 
-This extension relies on the following dependencies:
-- **tree** command (for generating tree structure files on supported systems). Make sure `tree` is installed on your system:
-  ```bash
-  sudo apt install tree  # For Linux
-  brew install tree      # For macOS
+Visual Studio Code version 1.95.0 or higher.
 
 ## Extension Settings
 
-The following settings are available to customize excluded files and directories:
+This extension contributes the following settings:
 
-### Excluded File Extensions
-- **Setting**: `appendContent.excludedFileExtensions`
-- **Default**: `[".env", ".otf", ".ttf", ".woff", ".woff2"]`
-- **Use**: Excludes files with these extensions from processing.
+### `directoryDigest.appendContent.excludedFileExtensions`
 
-### Excluded Directories
-- **Setting**: `appendContent.excludedDirectories`
-- **Default**: `["node_modules", ".git", ".svn", "CVS"]`
-- **Use**: Excludes these directories from processing.
+* **Type:** `string[]`
+* **Description:** Specify file extensions to exclude from processing (e.g., binaries, images, documents).
+* **Examples:** `[".exe", ".pdf", ".jpg"]`
 
-Example configuration in `settings.json`:
+### `directoryDigest.appendContent.excludedDirectories`
+
+* **Type:** `string[]`
+* **Description:** Specify directories to exclude from processing (e.g., version control, dependencies).
+* **Examples:** `["node_modules", ".git", "dist"]`
+
+
+## Configuring Exclusions
+
+You can customize these settings in your VS Code `settings.json`:
+
 ```json
-"appendContent.excludedFileExtensions": [".log", ".tmp"],
-"appendContent.excludedDirectories": ["node_modules", "dist"]
+{
+  "directoryDigest.appendContent.excludedFileExtensions": [".log", ".tmp"],
+  "directoryDigest.appendContent.excludedDirectories": ["node_modules", "dist"]
+}
 ````
+
+## Usage
+
+### Accessing the Extension
+
+The primary way to use Directory Digest is through the Explorer context menu:
+
+1. Left-click to select a directory in the Explorer pane.
+2. Right-click to open the context menu.
+3. Left-click on one of the Directory Digest options:
+    * **Directory Digest: Combine Files**
+    * **Directory Digest: Create 0L Structure**
+
+## Commands (For Advanced Users)
+
+While the extension is primarily intended to be used via the context menu, commands are available via the Command Palette:
+
+* **Combine Files:** `Directory Digest: Combine Files`
+* **Create 0L Structure:** `Directory Digest: Create 0L Structure`
+
+## Keybindings (Not Recommended)
+
+Keybindings are available, but using the context menu is the recommended approach. They are only active when a folder is selected in the Explorer.
+
+* **Combine Files:** 
+    * Windows/Linux: <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>
+    * macOS: <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>
+* **Create 0L Structure:**
+    * Windows/Linux: <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd>
+    * macOS: <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd>
+
 ## Known Issues
 
-- **Tree Command Dependency**: If `tree` is not installed, recursive directory processing will skip tree generation.
-- **Large Directories**: Processing very large directory structures may impact performance. You can cancel the operation if needed.
+* **Maximum Directory Depth:** The extension processes directories up to a depth of 10 levels to prevent infinite recursion.
+* **Large Directories:** Processing very large directories may impact performance.
 
 ## Release Notes
 
-### 1.0.0
-- Initial release with single and recursive directory processing commands.
+### 0.1.0
 
-### 1.1.0
-- Added configuration settings for excluded files and directories.
-- Improved logging with **winston** for better issue tracking.
-
----
-
-## Following Extension Guidelines
-
-Please refer to [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines) to ensure best practices are followed.
-
-## Additional Tips for Markdown Editing in VS Code
-
-- **Split the editor**: `Cmd+\` on macOS or `Ctrl+\` on Windows/Linux.
-- **Toggle preview**: `Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows/Linux.
-
-**Enjoy using Directory Digest!**
+Initial release of Directory Digest.

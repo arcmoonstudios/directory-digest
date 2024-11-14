@@ -7,6 +7,10 @@
   "version": "0.1.0",
   "type": "commonjs",
   "icon": "images/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arcmoonstudios/directory-digest.git"
+  },
   "galleryBanner": {
     "color": "#2F1754",
     "theme": "dark"
@@ -27,16 +31,13 @@
   "activationEvents": [
     "onStartupFinished"
   ],
-  "main": "./out/extension.js",
-  "files": [
-    "out/**/*"
-  ],
+  "main": "./dist/extension.js",
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run compile && npm run bundle",
     "compile": "tsc -p ./",
+    "bundle": "esbuild ./out/extension.js --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
     "watch": "tsc -watch -p ./",
     "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -w -p . --outDir out",
     "lint": "eslint ./src --ext .ts --fix",
     "clean-lock": "rm -f .vscode-test/user-data/Crashpad/pending/*.lock",
     "pretest": "yarn clean-lock && yarn compile-tests && yarn compile && yarn lint",
@@ -47,12 +48,16 @@
       {
         "command": "extension.appendDirectoryContent",
         "title": "Directory Digest: Combine Files",
-        "category": "Directory Digest"
+        "category": "Directory Digest",
+        "icon": "$(file-binary)",
+        "description": "Combines all text files in the selected directory into a single digest file"
       },
       {
         "command": "extension.appendAllToOutputDir",
         "title": "Directory Digest: Create 0L Structure",
-        "category": "Directory Digest"
+        "category": "Directory Digest",
+        "icon": "$(files)",
+        "description": "Creates an organized directory structure with content digests in 0L folder"
       }
     ],
     "menus": {
@@ -67,11 +72,34 @@
           "command": "extension.appendAllToOutputDir",
           "group": "7_modification"
         }
+      ],
+      "commandPalette": [
+        {
+          "command": "extension.appendDirectoryContent",
+          "when": "explorerResourceIsFolder"
+        },
+        {
+          "command": "extension.appendAllToOutputDir",
+          "when": "explorerResourceIsFolder"
+        }
       ]
     },
+    "keybindings": [
+      {
+        "command": "extension.appendDirectoryContent",
+        "key": "ctrl+shift+d",
+        "mac": "cmd+shift+d",
+        "when": "explorerResourceIsFolder"
+      },
+      {
+        "command": "extension.appendAllToOutputDir",
+        "key": "ctrl+shift+o",
+        "mac": "cmd+shift+o",
+        "when": "explorerResourceIsFolder"
+      }
+    ],
     "configuration": {
-      "type": "object",
-      "title": "Directory Digest Configuration",
+      "title": "Directory Digest",
       "properties": {
         "directoryDigest.appendContent.excludedFileExtensions": {
           "type": "array",
@@ -168,7 +196,9 @@
             ".xcworkspace",
             ".DS_Store"
           ],
-          "description": "File extensions to exclude from processing"
+          "description": "Specify file extensions to exclude from processing (e.g., binaries, images, documents)",
+          "scope": "resource",
+          "examples": [".exe", ".pdf", ".jpg"]
         },
         "directoryDigest.appendContent.excludedDirectories": {
           "type": "array",
@@ -249,7 +279,9 @@
             "Cargo.lock",
             "Cargo.toml"
           ],
-          "description": "Directories to exclude from processing"
+          "description": "Specify directories to exclude from processing (e.g., version control, dependencies)",
+          "scope": "resource",
+          "examples": ["node_modules", ".git", "dist"]
         }
       }
     }
@@ -262,13 +294,14 @@
     "@typescript-eslint/eslint-plugin": "^8.14.0",
     "@typescript-eslint/parser": "^8.14.0",
     "@vscode/test-electron": "^2.3.8",
+    "esbuild": "^0.24.0",
     "eslint": "^8.56.0",
     "glob": "^9.3.5",
     "mocha": "^10.2.0",
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "winston": "^3.11.0",
-    "glob": "^9.3.5"
+    "glob": "^9.3.5",
+    "winston": "^3.11.0"
   }
 }
