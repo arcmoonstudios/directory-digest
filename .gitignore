@@ -1,0 +1,9 @@
+# .gitignore
+
+node_modules/
+out/
+*.log
+*.tmp
+.vscode/
+extension.log
+test/test-fixtures/**/0L/
