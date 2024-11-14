@@ -102,3 +102,8 @@ Keybindings are available, but using the context menu is the recommended approac
 ### 0.1.0
 
 Initial release of Directory Digest.
+
+### 0.1.1
+
+Updated README.md with proper commands and technical usage.
+All future changes will be logged in the CHANGELOG.md

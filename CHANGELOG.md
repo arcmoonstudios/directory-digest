@@ -5,13 +5,19 @@ All notable changes to the "Directory Digest" extension are documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2024-11-14
+### Added
+- Commands to the extension page on VS Code
+
+### Changed
+- Updated README.md with proper commands and technical usage
+
 ## [0.1.0] - 2024-11-13
 ### Added
 - Initial release of Directory Digest
 - Two main commands:
   - "Combine Files": Merges multiple text files into a single digest
   - "Create 0L Structure": Generates organized directory structure
-- Updated README.md with proper commands and technical usage
 - Comprehensive error handling with Winston logging
 - Progress indicators for long-running operations
 - Support for special characters in file paths
