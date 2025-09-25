@@ -21,8 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### v0.2.2 Fixed
 
 - Replaced the original large demo video with a compressed version and removed the large binary from the repository history (history was rewritten and force-pushed to remove the large file from reachable refs). A local backup was retained during the operation.
-
-
+ 
 ### v0.2.0 Fixed
 
 - **CRITICAL**: Fixed VS Code extension activation error by removing `"type": "module"` from package.json
