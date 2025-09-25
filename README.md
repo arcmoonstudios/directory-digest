@@ -195,7 +195,11 @@ Keybindings are available, but using the context menu is the recommended approac
 
 Watch this short demo video to see Directory Digest in action:
 
-![Demo Video](assets/Usage.mp4)
+[![Demo Video](assets/icon.png)](https://raw.githubusercontent.com/arcmoonstudios/directory-digest/main/assets/Usage.mp4)
+
+If the thumbnail doesn't play in your browser, open the raw video directly:
+
+[Direct demo video link](https://raw.githubusercontent.com/arcmoonstudios/directory-digest/main/assets/Usage.mp4)
 
 ## Development
 
