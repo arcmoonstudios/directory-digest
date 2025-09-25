@@ -4,6 +4,16 @@ Directory Digest is a Visual Studio Code extension that adds powerful directory 
 
 ![Banner](assets/Banner.png)
 
+## Demo
+
+Watch this short demo video to see Directory Digest in action:
+
+![Demo Video](assets/Usage.gif)
+
+If the thumbnail doesn't play in your browser, open the raw video directly:
+
+[Direct demo video link](https://raw.githubusercontent.com/arcmoonstudios/directory-digest/main/assets/Usage.mp4)
+
 ## Features
 
 ### Combine Files
@@ -190,16 +200,6 @@ Keybindings are available, but using the context menu is the recommended approac
 - --Concatenate Entirety:--
   - Windows/Linux: `Ctrl`+`Shift`+`O`
   - macOS: `Cmd`+`Shift`+`O`
-
-## Demo
-
-Watch this short demo video to see Directory Digest in action:
-
-![Demo Video](assets/Usage.gif)
-
-If the thumbnail doesn't play in your browser, open the raw video directly:
-
-[Direct demo video link](https://raw.githubusercontent.com/arcmoonstudios/directory-digest/main/assets/Usage.mp4)
 
 ## Development
 
