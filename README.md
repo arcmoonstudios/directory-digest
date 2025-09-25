@@ -248,7 +248,16 @@ pnpm run vscode:prepublish
 
 ## Release Notes
 
-### 0.2.0 (Latest)
+### 0.2.2 (Latest)
+
+Enhanced file support and demo improvements:
+
+- Added support for modern JavaScript/TypeScript file extensions (.mjs, .cjs, .jsx, .tsx)
+- Improved README with embedded GIF demo for better user experience
+- Updated documentation and GitHub Pages demo site
+- Optimized package size and distribution
+
+### 0.2.0
 
 Major technical improvements and bug fixes:
 

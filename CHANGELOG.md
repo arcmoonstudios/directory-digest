@@ -4,23 +4,27 @@ All notable changes to the "Directory Digest" extension are documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.0] - 2025-01-24
-
 ## [0.2.2] - 2025-09-25
 
 ### v0.2.2 Added
 
-- GitHub Pages demo site and a playable demo page so the project's demo video can be played inline (added `docs/index.html`).
-- Added a compressed demo video asset and GitHub Pages copy (smaller `assets/Usage.mp4` in `docs/assets/`) and a committed compressed copy in the repo for convenient distribution.
+- Support for modern JavaScript/TypeScript file extensions (`.mjs`, `.cjs`, `.jsx`, `.tsx`) - these are now treated as text files and included in processing
+- Embedded GIF demo in README for better user experience and compatibility
+- GitHub Pages demo site with playable video (`docs/index.html`)
 
 ### v0.2.2 Changed
 
-- Treat `.mjs`, `.cjs`, `.jsx`, and `.tsx` files as text sources so they are read and concatenated by the "Combine Files" and "Concatenate Entirety" commands.
-- README demo image updated to use a clickable thumbnail linking to the raw demo video (improves compatibility with GitHub's README rendering).
+- README demo now uses embedded GIF format instead of MP4 video for better GitHub compatibility
+- Improved documentation and user experience with visual demo
+- Updated marketplace listing with enhanced README presentation
 
 ### v0.2.2 Fixed
 
-- Replaced the original large demo video with a compressed version and removed the large binary from the repository history (history was rewritten and force-pushed to remove the large file from reachable refs). A local backup was retained during the operation.
+- Resolved npm dependency conflicts during packaging process
+- Optimized package size and distribution
+- Fixed extension packaging issues that prevented proper marketplace publication
+
+## [0.2.0] - 2025-09-24
 
 ### v0.2.0 Fixed
 
@@ -139,13 +143,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-### Changed
+### Unreleased Changed
 
 - Renamed "Create 0L Structure" command to "Concatenate Entirety"
 - Changed output directory from "0L" to ".{directory-name}" for better organization
 - Fixed bug in appendAllToOutputDir to properly record parent directory names in file headers
 
-### Planned
+### Unreleased Planned
 
 - Additional file processing options
 - Enhanced progress visualization
