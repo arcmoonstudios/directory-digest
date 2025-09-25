@@ -1,0 +1,8 @@
+{
+  "includeDirectories": ["src", "docs"],
+  "excludeDirectories": ["temp", "cache", ".qodo"],
+  "includeFiles": ["README.md", "CHANGELOG.md"],
+  "excludeFiles": ["package-lock.json"],
+  "includePatterns": ["*.ts", "*.js", "*.md"],
+  "excludePatterns": ["*.test.*", "*.spec.*", "**/node_modules/**"]
+}

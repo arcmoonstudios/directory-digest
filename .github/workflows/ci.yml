@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: '10.17.1'
+
+    - name: Get pnpm store directory
+      shell: bash
+      run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+    - name: Install dependencies
+      run: pnpm install
+
+    - name: Show devDependencies
+      run: node -e "console.log(JSON.stringify(require('./package.json').devDependencies, null, 2))"
+
+    - name: Build for tests (pretest)
+      run: pnpm run pretest
+
+    - name: Install Xvfb (for headless test runs)
+      run: sudo apt-get update && sudo apt-get install -y xvfb
+
+    - name: Run Tests
+      run: xvfb-run -a pnpm run test
+
+    - name: Check Extension Manifest
+      run: |
+        # Run vsce from devDependencies via pnpm exec (package.json contains @vscode/vsce)
+        pnpm exec -- pnpm --version || true
+        pnpm exec -- vsce --version
+        pnpm exec -- vsce package --no-dependencies
+        rm *.vsix  # Clean up
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: extension-build
+        path: |
+          dist/

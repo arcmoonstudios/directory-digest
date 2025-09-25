@@ -1,0 +1,21 @@
+{
+    "files.exclude": {
+        "out": false,
+        "dist": false
+    },
+    "search.exclude": {
+        "out": true,
+        "dist": true,
+        "**/.ddconfig": true,
+        "**/*Files": true
+    },
+    "typescript.tsc.autoDetect": "off",
+    "directoryDigest.outputFormat": "Markdown",
+    "directoryDigest.includePatterns": [
+        "*.ts",
+        "*.md"
+    ],
+    "files.associations": {
+        "*.ddconfig": "json"
+    }
+}

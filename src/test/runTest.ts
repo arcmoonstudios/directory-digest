@@ -1,0 +1,34 @@
+import * as path from 'path';
+import * as fs from 'fs';
+import { runTests } from '@vscode/test-electron';
+async function main() {
+    try {
+        // The folder containing the Extension Manifest package.json
+    // __dirname at runtime will be `out/test` when compiled; two levels up is the project root
+    // (out/test -> out -> project root). The previous '../../../' pointed outside the repo.
+    const extensionDevelopmentPath = path.resolve(__dirname, '../../');
+
+        // The path to the extension test script
+        const extensionTestsPath = path.resolve(__dirname, './suite/index');
+        // The path to test workspace
+        const testWorkspace = path.resolve(extensionDevelopmentPath, 'test-fixtures');
+
+        // Download VS Code, unzip it and run the integration test
+        await runTests({
+            extensionDevelopmentPath,
+            extensionTestsPath,
+            launchArgs: [testWorkspace]
+        });
+    } catch (err) {
+        console.error('Failed to run tests:', err);
+        process.exit(1);
+    } finally {
+        const testDir = '.vscode-test';
+        if (fs.existsSync(testDir)) {
+            fs.rmSync(testDir, { recursive: true, force: true });
+            console.log(`Cleaned up ${testDir}`);
+        }
+    }
+}
+
+main();

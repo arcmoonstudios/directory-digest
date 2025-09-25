@@ -1,0 +1,76 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "typescript.tsc.autoDetect": "off",
+    "directoryDigest.outputFormat": "Markdown",
+    "directoryDigest.includePatterns": ["*.ts", "*.md"],
+    "directoryDigest.excludePatterns": ["*.test.*", "**/dist/**", "**/out/**"],
+    "search.exclude": {
+      "**/dist": true,
+      "**/out": true,
+      "**/.ddconfig": true,
+      "**/*Files": true
+    },
+    "files.exclude": {
+      "**/out": true
+    },
+    "terminal.integrated.defaultProfile.windows": "PowerShell"
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-vscode.vscode-typescript-next",
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode"
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Compile Extension",
+        "type": "shell",
+        "command": "pnpm",
+        "args": ["run", "compile"],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        },
+        "problemMatcher": ["$tsc"]
+      },
+      {
+        "label": "Bundle Extension",
+        "type": "shell",
+        "command": "pnpm",
+        "args": ["run", "bundle"],
+        "group": "build",
+        "dependsOn": "Compile Extension",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        }
+      },
+      {
+        "label": "Test Extension",
+        "type": "shell",
+        "command": "pnpm",
+        "args": ["run", "test"],
+        "group": "test",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        }
+      }
+    ]
+  }
+}
