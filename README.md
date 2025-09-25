@@ -195,7 +195,7 @@ Keybindings are available, but using the context menu is the recommended approac
 
 Watch this short demo video to see Directory Digest in action:
 
-[![Demo Video](assets/icon.png)](https://github.com/user-attachments/assets/1f12a642-c973-4645-9b0f-d8acd7501a92)
+[![Demo Video](assets/icon.png)](https://github.com/arcmoonstudios/directory-digest/releases/download/v0.2.2/Usage.mp4)
 
 If the thumbnail doesn't play in your browser, open the raw video directly:
 
