@@ -181,9 +181,9 @@ async function isFileSizeAllowed(filePath: string, maxFileSize: number): Promise
 
 export function isTextFile(filePath: string): boolean {
     const textFileExtensions = [
-        '.txt', '.md', '.js', '.ts', '.mjs', '.cjs', '.jsx', '.tsx''.json', '.html', '.css',
-         '.py', '.java', '.c', '.cpp',
-        '.rs', '.go', '.rb', '.php', '.sql', '.xml', '.yaml', '.yml', '.toml', '.ini',
+        '.txt', '.md', '.js', '.ts', '.mjs', '.cjs', '.jsx', '.tsx', '.html', '.css',
+        '.rs', '.go', '.rb', '.php', '.py', '.java', '.c', '.cpp', '.json',
+        '.sql', '.xml', '.yaml', '.yml', '.toml', '.ini',
 
     ];
     return textFileExtensions.includes(path.extname(filePath).toLowerCase());
