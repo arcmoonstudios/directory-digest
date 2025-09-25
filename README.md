@@ -248,7 +248,15 @@ pnpm run vscode:prepublish
 
 ## Release Notes
 
-### 0.2.2 (Latest)
+### 0.2.3 (Latest)
+
+Critical bug fix release:
+
+- Fixed TypeScript syntax error in extension code that prevented proper compilation
+- Resolved missing comma in file extensions array that caused build failures
+- Ensures extension loads and functions correctly in VS Code
+
+### 0.2.2
 
 Enhanced file support and demo improvements:
 

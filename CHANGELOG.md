@@ -4,6 +4,15 @@ All notable changes to the "Directory Digest" extension are documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2025-09-25
+
+### v0.2.3 Fixed
+
+- **CRITICAL**: Fixed TypeScript syntax error in `src/extension.ts` that prevented extension compilation
+- Resolved missing comma between `.tsx` and `.json` in `textFileExtensions` array
+- Reorganized file extension array for better logical grouping
+- Ensures extension builds and loads correctly in VS Code
+
 ## [0.2.2] - 2025-09-25
 
 ### v0.2.2 Added
