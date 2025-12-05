@@ -19,7 +19,9 @@ jobs:
         with:
           node-version: '20'
       - name: Install pnpm
-        run: npm install -g pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10.24.0'
       - name: Install catalog dependencies
         run: pnpm install
       - name: Build the extension
@@ -43,7 +45,9 @@ jobs:
         with:
           node-version: '20'
       - name: Install pnpm
-        run: npm install -g pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10.24.0'
       - name: Download VSIX
         uses: actions/download-artifact@v4
         with:
