@@ -1,0 +1,62 @@
+name: Publish VSIX
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build & Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install pnpm
+        run: npm install -g pnpm
+      - name: Install catalog dependencies
+        run: pnpm install
+      - name: Build the extension
+        run: pnpm run vscode:prepublish
+      - name: Generate VSIX via packaging helper
+        run: pnpm run package:vsix
+      - name: Upload created VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix
+          path: DirectoryDigest-*.vsix
+
+  publish:
+    name: Publish to Marketplace
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install pnpm
+        run: npm install -g pnpm
+      - name: Download VSIX
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix
+      - name: Publish VSIX with vsce
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          pnpm install -g @vscode/vsce
+          # find the artifact file and publish via vsce using token in secret
+          VSIX_FILE=$(ls DirectoryDigest-*.vsix | head -n 1 || true)
+          if [ -z "$VSIX_FILE" ]; then
+            echo "VSIX file not found"
+            exit 2
+          fi
+          pnpm exec vsce publish -p "$VSCE_PAT" --packagePath "$VSIX_FILE"
