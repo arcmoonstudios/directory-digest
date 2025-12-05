@@ -48,7 +48,7 @@
   "prepare": "node ./scripts/install-hooks.js",
     "build-and-show": "pnpm run compile && dir out"
   },
-  "packageManager": "pnpm@10.17.1",
+  "packageManager": "pnpm@10.24.0",
   "contributes": {
     "commands": [
       {
