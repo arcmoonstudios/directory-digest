@@ -215,6 +215,18 @@ pnpm run package:vsix
 
 This will create a minimal package in a temporary folder, install production dependencies in that folder, and produce `DirectoryDigest-<version>.vsix` at the repository root. This script avoids numerous dependency issues you might otherwise see when running `vsce package` at the repository root.
 
+### Automating VSIX publish via GitHub Actions
+
+You can publish the extension automatically using the included GitHub Actions workflow `publish.yml` which triggers on `v*.*.*` tags (e.g., `v0.3.0`). To enable automatic publishing you will need to create a repository secret named `VSCE_PAT` containing a valid Visual Studio Marketplace Personal Access Token (PAT) with `All accessible accounts` and `Publish` scope.
+
+Steps to enable:
+
+1. Go to GitHub > Settings > Secrets and variables > Actions > New repository secret
+2. Add `VSCE_PAT` with the PAT from the Visual Studio Marketplace
+3. Create a tag (for example `v0.3.0`) and push it to the repository to trigger the workflow. The workflow will build, package, and publish the extension to the Marketplace.
+
+Note: For security, rotate your token regularly and never commit it to the repository.
+
 
 ## Usage
 
