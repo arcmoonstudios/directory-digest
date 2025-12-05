@@ -47,7 +47,7 @@ interface ProgressContext {
  */
 function loadConfiguration(): DigestConfig {
     const config = vscode.workspace.getConfiguration('directoryDigest');
-    
+
     return {
         outputFormat: config.get<'Text' | 'Markdown' | 'JSON'>('outputFormat', 'Text'),
         maxFileSize: config.get<number>('maxFileSize', 1048576), // 1MB default
@@ -72,6 +72,22 @@ async function loadConfigFile(baseDir: string, configFileName: string): Promise<
         logger.info(`Loaded config file: ${configPath}`);
         return configData;
     } catch (err) {
+        // If file not found and the requested file was the default .ddconfig,
+        // automatically attempt to load .ddconfig.example as a useful fallback.
+        if ((err as { code?: string }).code === 'ENOENT' && configFileName === '.ddconfig') {
+            const examplePath = path.join(baseDir, '.ddconfig.example');
+            try {
+                const exampleContent = await fsPromises.readFile(examplePath, 'utf-8');
+                const exampleData = JSON.parse(exampleContent) as ConfigFile;
+                logger.info(`Loaded example config file: ${examplePath}`);
+                return exampleData;
+            } catch (exampleErr) {
+                if ((exampleErr as { code?: string }).code !== 'ENOENT') {
+                    logger.warn(`Failed to load example config file ${examplePath}: ${exampleErr}`);
+                }
+                return null;
+            }
+        }
         if ((err as { code?: string }).code !== 'ENOENT') {
             logger.warn(`Failed to load config file ${configPath}: ${err}`);
         }
@@ -182,8 +198,12 @@ async function isFileSizeAllowed(filePath: string, maxFileSize: number): Promise
 export function isTextFile(filePath: string): boolean {
     const textFileExtensions = [
         '.txt', '.md', '.js', '.ts', '.mjs', '.cjs', '.jsx', '.tsx', '.json', '.html', '.css',
-        '.rs', '.go', '.rb', '.php', '.py', '.java', '.c', '.cpp',
+        '.rs', '.go', '.rb', '.php', '.py', '.java', '.c', '.cpp', '.cu', '.cuh', '.h', '.hpp',
+        '.cs', '.swift', '.sh', '.bash', '.zsh', '.ps1', '.pl', '.rb', '.lua', '.r', '.scala',
+        '.kt', '.kts', '.gradle', '.groovy', '.makefile', 'makefile', '.dockerfile', 'dockerfile',
+        '.graphql', '.gql', '.csv', '.toon',
         '.sql', '.xml', '.yaml', '.yml', '.toml', '.ini',
+
 
     ];
     return textFileExtensions.includes(path.extname(filePath).toLowerCase());
@@ -201,10 +221,13 @@ function formatFileEntry(entry: FileEntry, format: 'Text' | 'Markdown' | 'JSON')
                 const extension = path.extname(entry.path).slice(1) || 'text';
                 return `### File: ${entry.relativePath}\n\n\`\`\`${extension}\n${entry.content || ''}\n\`\`\`\n\n`;
             }
-        
+
         case 'JSON':
             return JSON.stringify(entry, null, 2) + '\n';
-        
+
+        // No explicit 'TOON' format—.toon files are treated as plain text content and will
+        // be formatted using the general 'Text' or 'Markdown' format, depending on settings.
+
         case 'Text':
         default:
             if (entry.isDirectory) {
@@ -255,6 +278,7 @@ export async function appendDirectoryContent(selectedDir: string, progressContex
     const outputFile = path.join(outputDir, `${sanitizeFilename(dirName)}${outputExtension}`);
     
     const entries: FileEntry[] = [];
+    logger.info(`appendAllToOutputDir maxDepth=${config.maxDepth}`);
     let processedFiles = 0;
     let totalFiles = 0;
 
@@ -316,7 +340,9 @@ export async function appendDirectoryContent(selectedDir: string, progressContex
 
     // First pass: count total files for progress tracking
     async function countFiles(dir: string, depth: number = 0): Promise<number> {
-        if (depth >= config.maxDepth) {
+        // Allow directories up to the configured maxDepth (inclusive), where depth=0 is the
+        // root directory. Return 0 only when depth exceeds the maximum.
+        if (depth > config.maxDepth) {
             return 0;
         }
 
@@ -399,7 +425,9 @@ export async function appendDirectoryContent(selectedDir: string, progressContex
     }
 
     async function processDirectory(dir: string, depth: number = 0): Promise<void> {
-        if (depth >= config.maxDepth) {
+        // Allow processing for depth values <= config.maxDepth; bail out only when
+        // we exceed the configured maximum depth.
+        if (depth > config.maxDepth) {
             logger.warn(`Maximum depth (${config.maxDepth}) reached at: ${dir}`);
             return;
         }
@@ -467,66 +495,113 @@ export async function appendDirectoryContent(selectedDir: string, progressContex
  * Concatenates all files into organized structure in .{dirName} directory
  */
 export async function appendAllToOutputDir(selectedDir: string): Promise<void> {
+    const config = loadConfiguration();
+    const configFile = await loadConfigFile(selectedDir, config.configFilePath);
     const dirName = path.basename(selectedDir);
     const outputDir = path.join(selectedDir, `.${sanitizeFilename(dirName)}`);
-    const treeFile = path.join(outputDir, `${sanitizeFilename(dirName)}.txt`);
+    const treeFile = path.join(outputDir, `${sanitizeFilename(dirName)}.md`);
 
+    const entries: FileEntry[] = [];
     try {
-        await fsPromises.mkdir(outputDir, { recursive: true });
-        await fsPromises.writeFile(treeFile, '');
-        logger.info(`Created output directory: ${outputDir}`);
-
-        async function processFile(dir: string, filePath: string): Promise<void> {
-            try {
-                const relativeDir = path.relative(selectedDir, dir) || dirName;
-                const parentName = sanitizeFilename(path.basename(dir));
-                const outputFile = path.join(outputDir, `${parentName}.txt`);
-
-                if (isTextFile(filePath)) {
-                    const content = await fsPromises.readFile(filePath, 'utf-8');
-                    const header = `\nDirectory: ${relativeDir}\nFile: ${path.basename(filePath)}\n${'='.repeat(path.basename(filePath).length + 6)}\n`;
-                    await fsPromises.appendFile(outputFile, header + content + '\n\n');
-                    await fsPromises.appendFile(treeFile, header + content + '\n\n');
-                    logger.info(`Processed text file: ${filePath}`);
-                } else {
-                    const header = `\n[${path.basename(filePath)}]binary\n${'='.repeat(path.basename(filePath).length + 8)}\n`;
-                    await fsPromises.appendFile(outputFile, header);
-                    await fsPromises.appendFile(treeFile, header);
-                    logger.info(`Processed binary file: ${filePath}`);
-                }
-            } catch (err) {
-                logger.error(`Failed to process file ${filePath}: ${err}`);
-            }
-        }
-
         async function processDirectory(dir: string, depth: number = 0): Promise<void> {
-            if (depth > 10) {
-                logger.warn(`Maximum depth reached at: ${dir}`);
-                return;
-            }
-
+            // Note: we treat maxDepth as inclusive (a value of `10` allows 10 levels deep). If the
+            // current depth exceeds the configured maximum, stop traversing. This matches tests'
+            // expectation that a maxDepth of 10 includes deep-9 (depth value 10).
+            if (depth > config.maxDepth) return;
             try {
-                const entries = await fsPromises.readdir(dir, { withFileTypes: true });
-                const processPromises = entries.map(async (entry) => {
+                const dirEntries = await fsPromises.readdir(dir, { withFileTypes: true });
+                for (const entry of dirEntries) {
                     const fullPath = path.join(dir, entry.name);
-                    if (entry.isSymbolicLink()) {
-                        return;
+                    const relativePath = path.relative(selectedDir, fullPath);
+                    if (entry.isSymbolicLink()) continue;
+                    if (entry.isDirectory()) {
+                        // Skip the output directory if it already exists (avoid self-inclusion)
+                        if (path.resolve(fullPath) === path.resolve(outputDir)) {
+                            continue;
+                        }
+                        if (!shouldExcludeDirectory(entry.name, config, configFile ?? undefined)) {
+                            await processDirectory(fullPath, depth + 1);
+                        }
+                    } else if (entry.isFile()) {
+                        if (!shouldExcludeFile(entry.name, config, configFile ?? undefined) && matchesPatterns(relativePath, config, configFile ?? undefined) && await isFileSizeAllowed(fullPath, config.maxFileSize)) {
+                            let content = '';
+                            if (isTextFile(fullPath)) {
+                                try {
+                                    content = await fsPromises.readFile(fullPath, 'utf-8');
+                                } catch (err) {
+                                    logger.warn(`Failed to read file ${fullPath}: ${err}`);
+                                    content = `[Error reading file: ${err}]`;
+                                }
+                            }
+                            const stats = await fsPromises.stat(fullPath);
+                            entries.push({
+                                path: fullPath,
+                                relativePath: relativePath.replace(/\\/g, '/'),
+                                content,
+                                size: stats.size,
+                                isDirectory: false
+                            });
+                        }
                     }
-                    if (entry.isDirectory() && !shouldExcludeDirectory(entry.name)) {
-                        await processDirectory(fullPath, depth + 1);
-                    } else if (entry.isFile() && !shouldExcludeFile(entry.name)) {
-                        await processFile(dir, fullPath);
-                    }
-                });
-                await Promise.all(processPromises);
+                }
             } catch (err) {
                 logger.error(`Failed to process directory ${dir}: ${err}`);
             }
         }
 
         await processDirectory(selectedDir);
+        // Create output directory after processing to avoid including it in the traversal
+        await fsPromises.mkdir(outputDir, { recursive: true });
+        logger.info(`Created output directory: ${outputDir}`);
 
-        // Clean up empty files
+        // Sort entries alphabetically by relativePath
+        entries.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+        logger.info(`Collected ${entries.length} file entries for output`);
+        if (entries.length > 0) {
+            logger.info(`First entry: ${entries[0].relativePath}; Last entry: ${entries[entries.length - 1].relativePath}`);
+        }
+
+        // Build per-directory groups
+        const groups: { [dir: string]: FileEntry[] } = {};
+        for (const e of entries) {
+            const parentDir = path.dirname(e.relativePath) === '.' ? '' : path.dirname(e.relativePath);
+            if (!groups[parentDir]) groups[parentDir] = [];
+            groups[parentDir].push(e);
+        }
+
+        // Helper to sanitize lines for lint-free output (trim trailing spaces)
+        const sanitizeContent = (content: string) => content.split('\n').map(l => l.replace(/\s+$/g, '')).join('\n');
+
+        // Build the markdown header
+        const header = `# ${dirName}\n\n## Concatenated Directory Files\n\n`;
+
+        // Write tree file: contains everything
+        let treeContent = header;
+        for (const group of Object.keys(groups).sort()) {
+            const files = groups[group].sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+            for (const fileEntry of files) {
+                const lang = path.extname(fileEntry.path).replace('.', '') || 'text';
+                const content = sanitizeContent(fileEntry.content || '');
+                treeContent += `\n\n### File: ${fileEntry.relativePath}\n\n\`\`\`${lang}\n${content}\n\`\`\`\n\n---\n\n`;
+            }
+        }
+        await fsPromises.writeFile(treeFile, treeContent, 'utf-8');
+
+        // Write per-directory files
+        for (const [group, files] of Object.entries(groups)) {
+            const parentName = group === '' ? sanitizeFilename(dirName) : sanitizeFilename(path.basename(group));
+            const outPath = path.join(outputDir, `${parentName}.md`);
+            let fileContent = header;
+            const fSorted = files.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+            for (const fileEntry of fSorted) {
+                const lang = path.extname(fileEntry.path).replace('.', '') || 'text';
+                const content = sanitizeContent(fileEntry.content || '');
+                fileContent += `\n\n### File: ${fileEntry.relativePath}\n\n\`\`\`${lang}\n${content}\n\`\`\`\n\n---\n\n`;
+            }
+            await fsPromises.writeFile(outPath, fileContent, 'utf-8');
+        }
+
+        // Remove any empty files (should not happen but safe-guard)
         const files = await fsPromises.readdir(outputDir);
         await Promise.all(files.map(async (file) => {
             const filePath = path.join(outputDir, file);
@@ -538,7 +613,6 @@ export async function appendAllToOutputDir(selectedDir: string): Promise<void> {
         }));
 
         logger.info(`Successfully processed directory: ${selectedDir}`);
-
     } catch (err) {
         logger.error(`Operation failed: ${err}`);
         throw err;
@@ -643,26 +717,21 @@ export function activate(context: vscode.ExtensionContext) {
         const dirName = path.basename(targetDir!);
         
         try {
-            const processWithProgress = async (): Promise<void> => {
-                return await vscode.window.withProgress({
-                    location: vscode.ProgressLocation.Notification,
-                    title: "Directory Digest - Concatenate Entirety",
-                    cancellable: false
-                }, async (progress) => {
-                    progress.report({ message: "Concatenating directory contents..." });
-                    
-                    const startTime = Date.now();
-                    await appendAllToOutputDir(targetDir!);
-                    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-                    
-                    vscode.window.showInformationMessage(
-                        `Directory concatenated in .${dirName} successfully! (${duration}s)`
-                    );
-                });
-            };
-        
-            await processWithProgress();
-        
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: "Directory Digest - Concatenate Entirety",
+                cancellable: false
+            }, async (progress) => {
+                progress.report({ message: "Concatenating directory contents..." });
+                
+                const startTime = Date.now();
+                await appendAllToOutputDir(targetDir!);
+                const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+                
+                vscode.window.showInformationMessage(
+                    `Directory concatenated in .${dirName} successfully! (${duration}s)`
+                );
+            });
         } catch (err) {
             logger.error(`Command execution failed: ${err}`);
             const shouldRetry = await showErrorWithRetry('Failed to organize directory', err);
@@ -677,7 +746,7 @@ export function activate(context: vscode.ExtensionContext) {
                         progress.report({ message: "Retrying directory concatenation..." });
                         await appendAllToOutputDir(targetDir!);
                     });
-                    
+
                     vscode.window.showInformationMessage(`Directory concatenated successfully on retry in .${dirName}!`);
                 } catch (retryErr) {
                     vscode.window.showErrorMessage(`Retry failed: ${retryErr}`);

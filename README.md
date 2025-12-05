@@ -20,6 +20,8 @@ If the thumbnail doesn't play in your browser, open the raw video directly:
 
 --Description:-- Appends the content of all text files within a selected directory (recursively) into a new file named after the directory (e.g., `.MyDirectory.txt`). Non-text files and specified directories are excluded.
 
+Supported text formats include common language files (`.js`, `.ts`, `.py`, `.md` etc.) and now `.toon` files are also treated as text content.
+
 --How to Use:--
 
 1. Left-click to select a directory in the Explorer pane.
@@ -35,6 +37,33 @@ If the thumbnail doesn't play in your browser, open the raw video directly:
 1. Left-click to select a directory in the Explorer pane.
 2. Right-click to open the context menu.
 3. Left-click on "Directory Digest: Concatenate Entirety".
+
+Note: The `Concatenate Entirety` option now writes Markdown output files (`.md`) and uses a standardized header and code-fence format for each generated file. Each generated file begins with the following header and contains the concatenated file contents in language-tagged fenced blocks ordered alphabetically by file path.
+
+Top-level file header:
+
+## {Name of Directory}
+
+### Concatenated Directory Files
+
+Each grouped/concatenated entry begins with `### File: path/to/file.ext` followed by a fenced code block that uses the file extension as the language tag (e.g., js or txt). Entries are separated with a `---` horizontal rule. Example (conceptual):
+
+### File: docs/index.md
+
+```md
+# Intro
+...
+```
+
+---
+
+### File: docs/guide.txt
+
+```text
+Guide text content...
+```
+
+Example: Running `Concatenate Entirety` on `./docs` creates `./docs/.docs/docs.md` and per-directory `.md` files within `.docs/`.
 
 ### New Configuration-Based Functionality
 
@@ -55,6 +84,7 @@ If the thumbnail doesn't play in your browser, open the raw video directly:
 
 - **Max File Size**: `directoryDigest.maxFileSize` (default: 1MB)
 - **Max Depth**: `directoryDigest.maxDepth` (default: 10 levels)
+- **Note**: `directoryDigest.maxDepth` is inclusive (e.g., a value of `10` processes levels 0..9).
 - Prevents system overload on large directories
 
 #### 4. .ddconfig File Support
@@ -64,6 +94,8 @@ Project-specific configuration file with additional settings:
 ```json
 {
   "includeDirectories": ["src", "docs"],
+
+If a `.ddconfig` file is not present in the workspace, the extension will attempt to use a `.ddconfig.example` file as a helpful fallback.
   "excludeDirectories": ["temp", "cache"],
   "includeFiles": ["README.md", "CHANGELOG.md"],
   "excludeFiles": ["package-lock.json"],
