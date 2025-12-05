@@ -65,11 +65,12 @@ jobs:
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
-          pnpm install -g @vscode/vsce
+          # Use npm to install the vsce binary globally; npm config for global bins is configured for runners
+          npm install -g @vscode/vsce
           # find the artifact file and publish via vsce using token in env
           VSIX_FILE=$(ls DirectoryDigest-*.vsix | head -n 1 || true)
           if [ -z "$VSIX_FILE" ]; then
             echo "VSIX file not found"
             exit 2
           fi
-          pnpm exec vsce publish -p "$VSCE_PAT" --packagePath "$VSIX_FILE"
+          vsce publish -p "$VSCE_PAT" --packagePath "$VSIX_FILE"
