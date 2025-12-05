@@ -203,6 +203,19 @@ You can customize these settings in your VS Code `settings.json`:
 }
 ```
 
+## Packaging a VSIX
+
+If you need to generate a .vsix file for manual testing or to publish to the VS Code Marketplace without relying on your root dev toolchain, use the included packaging helper which creates a clean temporary package and runs the official `vsce` packager inside it.
+
+Run:
+
+```powershell
+pnpm run package:vsix
+```
+
+This will create a minimal package in a temporary folder, install production dependencies in that folder, and produce `DirectoryDigest-<version>.vsix` at the repository root. This script avoids numerous dependency issues you might otherwise see when running `vsce package` at the repository root.
+
+
 ## Usage
 
 ### Accessing the Extension
