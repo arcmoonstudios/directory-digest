@@ -28,7 +28,9 @@ Supported text formats include common language files (`.js`, `.ts`, `.py`, `.md`
 2. Right-click to open the context menu.
 3. Left-click on "Directory Digest: Combine Files".
 
-### Concatenate Entirety
+--Note:-- If you select a folder named `src`, the generated output will use the parent folder's name for the output files (for example, `my_repo/src/` becomes `.MyRepoFiles/MyRepo.txt` for Combine Files).
+
+### Create Markdown
 
 --Description:-- Recursively processes all subdirectories and files within a selected directory, creating a tree structure file and saving the directory contents to an organized output directory named after the selected directory with a dot prefix (e.g., `.MyDirectory`).
 
@@ -36,9 +38,11 @@ Supported text formats include common language files (`.js`, `.ts`, `.py`, `.md`
 
 1. Left-click to select a directory in the Explorer pane.
 2. Right-click to open the context menu.
-3. Left-click on "Directory Digest: Concatenate Entirety".
+3. Left-click on "Directory Digest: Create Markdown".
 
-Note: The `Concatenate Entirety` option now writes Markdown output files (`.md`) and uses a standardized header and code-fence format for each generated file. Each generated file begins with the following header and contains the concatenated file contents in language-tagged fenced blocks ordered alphabetically by file path.
+--Note:-- If you select a folder named `src`, the generated output will use the parent folder's name for the output files (for example, `my_repo/src/` becomes `.MyRepo/MyRepo.md` for Create Markdown).
+
+Note: The `Create Markdown` option now writes Markdown output files (`.md`) and uses a standardized header and code-fence format for each generated file. Each generated file begins with the following header and contains the concatenated file contents in language-tagged fenced blocks ordered alphabetically by file path.
 
 Top-level file header:
 
@@ -63,7 +67,7 @@ Each grouped/concatenated entry begins with `### File: path/to/file.ext` followe
 Guide text content...
 ```
 
-Example: Running `Concatenate Entirety` on `./docs` creates `./docs/.docs/docs.md` and per-directory `.md` files within `.docs/`.
+Example: Running `Create Markdown` on `./docs` creates `./docs/.docs/docs.md` and per-directory `.md` files within `.docs/`.
 
 ### New Configuration-Based Functionality
 
@@ -227,7 +231,6 @@ Steps to enable:
 
 Note: For security, rotate your token regularly and never commit it to the repository.
 
-
 ## Usage
 
 ### Accessing the Extension
@@ -237,15 +240,17 @@ The primary way to use Directory Digest is through the Explorer context menu:
 1. Left-click to select a directory in the Explorer pane.
 2. Right-click to open the context menu.
 3. Left-click on one of the Directory Digest options:
-   - --Directory Digest: Combine Files--
-   - --Directory Digest: Concatenate Entirety--
+
+- --Directory Digest: Combine Files--
+- --Directory Digest: Create Markdown--
 
 ### Commands (For Advanced Users)
 
 While the extension is primarily intended to be used via the context menu, commands are available via the Command Palette:
 
 - --Combine Files:-- `Directory Digest: Combine Files`
-- --Concatenate Entirety:-- `Directory Digest: Concatenate Entirety`
+
+- --Create Markdown:-- `Directory Digest: Create Markdown`
 
 ### Keybindings (Not Recommended)
 
@@ -254,7 +259,8 @@ Keybindings are available, but using the context menu is the recommended approac
 - --Combine Files:--
   - Windows/Linux: `Ctrl`+`Shift`+`D`
   - macOS: `Cmd`+`Shift`+`D`
-- --Concatenate Entirety:--
+
+- --Create Markdown:--
   - Windows/Linux: `Ctrl`+`Shift`+`O`
   - macOS: `Cmd`+`Shift`+`O`
 

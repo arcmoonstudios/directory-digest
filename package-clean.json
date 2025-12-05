@@ -31,25 +31,6 @@
     "onStartupFinished"
   ],
   "main": "./dist/extension.js",
-  "scripts": {
-    "vscode:prepublish": "pnpm run compile && pnpm run bundle && pnpm run clean-out",
-    "compile": "tsc -p ./",
-    "bundle": "esbuild ./out/extension.js --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
-    "watch": "tsc -watch -p ./",
-    "compile-tests": "tsc -p . --outDir out",
-    "lint": "eslint ./src --ext .ts --fix",
-    "clean-lock": "rimraf .vscode-test/user-data/Crashpad/pending",
-    "pretest": "pnpm run clean-lock && rimraf out && pnpm run compile-tests && pnpm run compile && pnpm run bundle && pnpm run lint",
-    "test": "node ./out/test/runTest.js",
-    "posttest": "pnpm run clean-out",
-    "clean-out": "rimraf out",
-    "clean-logs": "rimraf .vscode-test ghlogs run-*.zip actions-*.zip || true",
-    "install-hooks": "node ./scripts/install-hooks.js",
-    "prepare": "node ./scripts/install-hooks.js",
-    "package:vsix": "node ./scripts/package-vsix.js",
-    "build-and-show": "pnpm run compile && dir out"
-  },
-  "packageManager": "pnpm@10.24.0",
   "contributes": {
     "commands": [
       {
@@ -141,24 +122,6 @@
         "when": "explorerResourceIsFolder"
       }
     ]
-  },
-  "devDependencies": {
-    "@eslint/js": "9.36.0",
-    "@types/glob": "^8.1.0",
-    "@types/minimatch": "^5.1.2",
-    "@types/mocha": "10.0.10",
-    "@types/node": "22.13.14",
-    "@types/vscode": "1.103.0",
-    "@typescript-eslint/eslint-plugin": "8.44.1",
-    "@typescript-eslint/parser": "8.44.1",
-    "@vscode/test-electron": "2.5.2",
-    "@vscode/vsce": "3.6.1",
-    "esbuild": "^0.25.10",
-    "eslint": "9.36.0",
-    "glob": "11.0.3",
-    "mocha": "11.7.2",
-    "rimraf": "^6.0.1",
-    "typescript": "5.9.2"
   },
   "dependencies": {
     "glob": "11.0.3",

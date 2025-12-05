@@ -1,6 +1,0 @@
-
-Directory: .src
-File: src.txt
-=============
-
-

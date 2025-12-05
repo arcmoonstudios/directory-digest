@@ -1,0 +1,8 @@
+{
+  "includeDirectories": ["src", "docs"],
+  "excludeDirectories": ["node_modules", ".git"],
+  "includeFiles": ["README.md", "LICENSE"],
+  "excludeFiles": ["secret.key", "private.pem"],
+  "includePatterns": ["**/*.txt", "**/*.md", "**/*.json", "**/*.toon"],
+  "excludePatterns": ["**/node_modules/**", "**/.git/**"]
+}

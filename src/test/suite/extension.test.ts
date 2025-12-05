@@ -252,6 +252,31 @@ suite('Directory Digest Extension Test Suite', () => {
             assert.ok(content.includes('More special characters'), 'Should contain content from special character files');
             assert.ok(content.includes('Special subfolder content'), 'Should contain content from special character subfolders');
         });
+        
+        test('src selection uses parent directory name for outputs', async () => {
+            const repoRoot = path.join(testFixturesDir, 'repo-src-test');
+            const srcDir = path.join(repoRoot, 'src');
+            await fs.mkdir(srcDir, { recursive: true });
+            await createTestFile(srcDir, 'sample.txt', 'hello src');
+
+            // Combine Files (single-file digest)
+            await appendDirectoryContent(srcDir);
+            const parentName = path.basename(repoRoot);
+            const combineOutputDir = path.join(srcDir, `.${sanitizeFilename(parentName)}Files`);
+            const combineExpected = path.join(combineOutputDir, `${sanitizeFilename(parentName)}.txt`);
+            const combineExists = await fs.access(combineExpected).then(() => true).catch(() => false);
+            assert.strictEqual(combineExists, true, 'Combine Files should create output with parent name when selecting src');
+
+            // Create Markdown (structured output)
+            await appendAllToOutputDir(srcDir);
+            const mdOutputDir = path.join(srcDir, `.${sanitizeFilename(parentName)}`);
+            const mdTree = path.join(mdOutputDir, `${sanitizeFilename(parentName)}.md`);
+            const mdExists = await fs.access(mdTree).then(() => true).catch(() => false);
+            assert.strictEqual(mdExists, true, 'Create Markdown should create output with parent name when selecting src');
+
+            // Cleanup
+            await fs.rm(repoRoot, { recursive: true, force: true });
+        });
     });
 
     suite('Append All To Output Directory Tests', () => {
@@ -260,7 +285,7 @@ suite('Directory Digest Extension Test Suite', () => {
 
             const dirName = 'recursive-test';
             const outputDir = path.join(recursiveTestDir, `.${dirName}`);
-            const treeFile = path.join(outputDir, `${dirName}.txt`);
+            const treeFile = path.join(outputDir, `${dirName}.md`);
 
             const outputExists = await fs.access(outputDir).then(() => true).catch(() => false);
             const treeExists = await fs.access(treeFile).then(() => true).catch(() => false);
@@ -275,7 +300,7 @@ suite('Directory Digest Extension Test Suite', () => {
             }
 
             for (let i = 0; i < 5; i++) {
-                const levelFile = path.join(outputDir, `level-${i}.txt`);
+                const levelFile = path.join(outputDir, `level-${i}.md`);
                 const exists = await fs.access(levelFile).then(() => true).catch(() => false);
                 assert.strictEqual(exists, true, `Level ${i} file should exist`);
 
@@ -292,7 +317,7 @@ suite('Directory Digest Extension Test Suite', () => {
 
             const dirName = 'recursive-test';
             const outputDir = path.join(recursiveTestDir, `.${dirName}`);
-            const emptyDirOutput = path.join(outputDir, 'empty-dir.txt');
+            const emptyDirOutput = path.join(outputDir, 'empty-dir.md');
 
             const exists = await fs.access(emptyDirOutput).then(() => true).catch(() => false);
             assert.strictEqual(exists, false, 'Empty directory file should not be created');
@@ -303,7 +328,7 @@ suite('Directory Digest Extension Test Suite', () => {
 
             const dirName = 'exclude-test';
             const outputDir = path.join(excludeTestDir, `.${dirName}`);
-            const treeFile = path.join(outputDir, `${dirName}.txt`);
+            const treeFile = path.join(outputDir, `${dirName}.md`);
             const content = await fs.readFile(treeFile, 'utf8');
 
             assert.ok(content.includes('Include this content'), 'Should include non-excluded content');
@@ -317,7 +342,7 @@ suite('Directory Digest Extension Test Suite', () => {
 
             const dirName = 'special-chars-test';
             const outputDir = path.join(specialCharsDir, `.${dirName}`);
-            const treeFile = path.join(outputDir, `${dirName}.txt`);
+            const treeFile = path.join(outputDir, `${dirName}.md`);
             const dirContent = await fs.readdir(outputDir);
 
             const treeContent = await fs.readFile(treeFile, 'utf8');
@@ -325,8 +350,8 @@ suite('Directory Digest Extension Test Suite', () => {
             assert.ok(treeContent.includes('More special characters'), 'Tree should contain additional special content');
             assert.ok(treeContent.includes('Special subfolder content'), 'Tree should contain subfolder content');
 
-            const sanitizedFiles = dirContent.filter(f => f !== `${dirName}.txt`);
-            assert.ok(sanitizedFiles.every(f => /^[a-zA-Z0-9-_]+\.txt$/.test(f)), 'All files should have sanitized names');
+            const sanitizedFiles = dirContent.filter(f => f !== `${dirName}.md`);
+            assert.ok(sanitizedFiles.every(f => /^[a-zA-Z0-9-_]+\.md$/.test(f)), 'All files should have sanitized names');
 
             let foundContent = false;
             for (const file of sanitizedFiles) {
@@ -350,22 +375,54 @@ suite('Directory Digest Extension Test Suite', () => {
 
             const dirName = 'recursive-test';
             const outputDir = path.join(recursiveTestDir, `.${dirName}`);
-            const treeFile = path.join(outputDir, `${dirName}.txt`);
+            const treeFile = path.join(outputDir, `${dirName}.md`);
             const treeContent = await fs.readFile(treeFile, 'utf8');
 
-            for (let i = 0; i < 10; i++) {
-                assert.ok(
-                    treeContent.includes(`Deep level ${i} content`),
-                    `Should contain content from depth ${i}`
-                );
-            }
+            const cfg = vscode.workspace.getConfiguration('directoryDigest');
+            const expectedDepth = cfg.get<number>('maxDepth', 10);
+            const deepMatches = [...treeContent.matchAll(/Deep level (\d+) content/g)].map(m => Number(m[1]));
+            // Ensure we have at least expectedDepth entries in the tree for deep-* files (0..expectedDepth-1)
+            const uniqueDeepLevels = Array.from(new Set(deepMatches));
+            assert.ok(uniqueDeepLevels.length >= expectedDepth, `Should include at least ${expectedDepth} deep-level entries, found ${uniqueDeepLevels.length}`);
 
-            for (let i = 11; i < 15; i++) {
-                assert.ok(
-                    !treeContent.includes(`Deep level ${i} content`),
-                    `Should not contain content from depth ${i}`
-                );
+            for (let i = expectedDepth; i < 15; i++) {
+                assert.ok(!treeContent.includes(`Deep level ${i} content`), `Should not contain content from depth ${i}`);
             }
+        });
+
+        test('create markdown should produce markdown with header and code blocks in alphabetical order and be lint-free', async () => {
+            const alphaDir = path.join(testFixturesDir, 'alpha-test');
+            await fs.mkdir(alphaDir, { recursive: true });
+            await createTestFile(alphaDir, 'b.txt', 'bbb');
+            await createTestFile(alphaDir, 'a.txt', 'aaa');
+            await createTestFile(alphaDir, 'c.txt', 'ccc');
+
+            await appendAllToOutputDir(alphaDir);
+
+            const dirName = 'alpha-test';
+            const outputDir = path.join(alphaDir, `.${dirName}`);
+            const treeFile = path.join(outputDir, `${dirName}.md`);
+            const treeContent = await fs.readFile(treeFile, 'utf8');
+
+            // Header checks
+            assert.ok(treeContent.startsWith(`# ${dirName}\n\n## Concatenated Directory Files`), 'Tree file should start with the expected markdown header');
+
+            // Code block sequence: extract file labels from '### File: ' headers
+            const fileHeaders = [...treeContent.matchAll(/### File: (.*?)\n/g)].map(m => m[1]);
+            // The expected alphabetical order of files in this directory
+            const expectedOrder = ['a.txt', 'b.txt', 'c.txt'];
+            const actualOrder = fileHeaders.map(h => path.basename(h));
+            assert.deepStrictEqual(actualOrder, expectedOrder, 'Files should be listed in alphabetical order in the tree file');
+
+            // Lint-free: ensure no trailing whitespace and fenced blocks closed
+            const lines = treeContent.split('\n');
+            assert.ok(lines.every(l => !/\s+$/.test(l)), 'No trailing whitespace in tree file lines');
+            // Ensure all code blocks have a closing fence count equal to opening
+            const fenceCount = (treeContent.match(/```/g) || []).length;
+            assert.ok(fenceCount % 2 === 0, 'All code blocks in tree file should be closed');
+
+            // Clean up
+            await fs.rm(alphaDir, { recursive: true, force: true });
         });
     });
 
@@ -441,6 +498,10 @@ suite('Directory Digest Extension Test Suite', () => {
             assert.strictEqual(isTextFile('test.png'), false, 'Should not identify .png as text');
         });
 
+        test('isTextFile should identify .toon as text', () => {
+            assert.strictEqual(isTextFile('test.toon'), true, 'Should identify .toon as text');
+        });
+
         test('appendDirectoryContent should handle config file loading', async () => {
             const testDir = path.join(testFixturesDir, 'config-test');
             await fs.mkdir(testDir, { recursive: true });
@@ -457,6 +518,17 @@ suite('Directory Digest Extension Test Suite', () => {
             const exists = await fs.access(outputFile).then(() => true).catch(() => false);
             assert.strictEqual(exists, true, 'Output file should exist with config');
             await fs.rm(testDir, { recursive: true, force: true });
+        });
+
+        test('example ddconfig should be valid JSON with common settings', async () => {
+            const examplePath = path.join(__dirname, '..', '..', '..', '.ddconfig.example');
+            const exists = await fs.access(examplePath).then(() => true).catch(() => false);
+            assert.strictEqual(exists, true, '.ddconfig.example should exist in repository root');
+
+            const content = await fs.readFile(examplePath, 'utf8');
+            const parsed = JSON.parse(content);
+            assert.ok(parsed, 'Example .ddconfig should parse as JSON');
+            assert.ok(parsed.includePatterns || parsed.includeFiles, 'Example .ddconfig should include includePatterns or includeFiles');
         });
 
         test('appendDirectoryContent should respect max file size', async () => {

@@ -2,6 +2,7 @@
 
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
 import * as fsPromises from 'fs/promises';
 import { minimatch } from 'minimatch';
 import { logger } from './utils/logger.js';
@@ -59,6 +60,8 @@ function loadConfiguration(): DigestConfig {
         excludedDirectories: config.get<string[]>('appendContent.excludedDirectories', excludedDirectories)
     };
 }
+
+// Prevent editor warnings for __dirname in environments where it's not typed
 
 /**
  * Loads and parses .ddconfig file if it exists
@@ -269,7 +272,12 @@ function wrapJSONOutput(entries: FileEntry[], dirName: string): string {
 export async function appendDirectoryContent(selectedDir: string, progressContext?: ProgressContext): Promise<void> {
     const config = loadConfiguration();
     const configFile = await loadConfigFile(selectedDir, config.configFilePath);
-    const dirName = path.basename(selectedDir);
+    // If a user selects a `src` directory, prefer the parent directory name for generated output
+    let dirName = path.basename(selectedDir);
+    if (dirName.toLowerCase() === 'src') {
+        const parent = path.basename(path.dirname(selectedDir));
+        if (parent) dirName = parent;
+    }
     const outputExtension = getOutputExtension(config.outputFormat);
     
     // Create dot-prefixed directory for output
@@ -433,8 +441,8 @@ export async function appendDirectoryContent(selectedDir: string, progressContex
         }
 
         try {
-            const dirEntries = await fsPromises.readdir(dir, { withFileTypes: true });
-            const processPromises = dirEntries.map(async (entry) => {
+            const dirEntries = await fsPromises.readdir(dir, { withFileTypes: true }) as fs.Dirent[];
+            const processPromises = dirEntries.map(async (entry: fs.Dirent) => {
                 if (progressContext?.token.isCancellationRequested) {
                     throw new Error('Operation was cancelled by user');
                 }
@@ -497,7 +505,12 @@ export async function appendDirectoryContent(selectedDir: string, progressContex
 export async function appendAllToOutputDir(selectedDir: string): Promise<void> {
     const config = loadConfiguration();
     const configFile = await loadConfigFile(selectedDir, config.configFilePath);
-    const dirName = path.basename(selectedDir);
+    // If a user selects a `src` directory, prefer the parent directory name for generated output
+    let dirName = path.basename(selectedDir);
+    if (dirName.toLowerCase() === 'src') {
+        const parent = path.basename(path.dirname(selectedDir));
+        if (parent) dirName = parent;
+    }
     const outputDir = path.join(selectedDir, `.${sanitizeFilename(dirName)}`);
     const treeFile = path.join(outputDir, `${sanitizeFilename(dirName)}.md`);
 
@@ -509,7 +522,7 @@ export async function appendAllToOutputDir(selectedDir: string): Promise<void> {
             // expectation that a maxDepth of 10 includes deep-9 (depth value 10).
             if (depth > config.maxDepth) return;
             try {
-                const dirEntries = await fsPromises.readdir(dir, { withFileTypes: true });
+                const dirEntries = await fsPromises.readdir(dir, { withFileTypes: true }) as fs.Dirent[];
                 for (const entry of dirEntries) {
                     const fullPath = path.join(dir, entry.name);
                     const relativePath = path.relative(selectedDir, fullPath);
@@ -603,7 +616,7 @@ export async function appendAllToOutputDir(selectedDir: string): Promise<void> {
 
         // Remove any empty files (should not happen but safe-guard)
         const files = await fsPromises.readdir(outputDir);
-        await Promise.all(files.map(async (file) => {
+    await Promise.all(files.map(async (file: string) => {
             const filePath = path.join(outputDir, file);
             const stat = await fsPromises.stat(filePath);
             if (stat.size === 0) {
@@ -647,7 +660,7 @@ export function activate(context: vscode.ExtensionContext) {
                     location: vscode.ProgressLocation.Notification,
                     title: "Directory Digest",
                     cancellable: true
-                }, async (progress, token) => {
+                }, async (progress: vscode.Progress<{ message?: string; increment?: number }>, token: vscode.CancellationToken) => {
                     progress.report({ message: "Initializing directory scan..." });
                     
                     const progressContext: ProgressContext = {
@@ -679,7 +692,7 @@ export function activate(context: vscode.ExtensionContext) {
                         location: vscode.ProgressLocation.Notification,
                         title: "Directory Digest (Retry)",
                         cancellable: true
-                    }, async (progress, token) => {
+                    }, async (progress: vscode.Progress<{ message?: string; increment?: number }>, token: vscode.CancellationToken) => {
                         const progressContext: ProgressContext = {
                             report: progress.report.bind(progress),
                             token: token
@@ -719,9 +732,9 @@ export function activate(context: vscode.ExtensionContext) {
         try {
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
-                title: "Directory Digest - Concatenate Entirety",
+                title: "Directory Digest - Create Markdown",
                 cancellable: false
-            }, async (progress) => {
+            }, async (progress: vscode.Progress<{ message?: string; increment?: number }>) => {
                 progress.report({ message: "Concatenating directory contents..." });
                 
                 const startTime = Date.now();
@@ -740,9 +753,9 @@ export function activate(context: vscode.ExtensionContext) {
                 try {
                     await vscode.window.withProgress({
                         location: vscode.ProgressLocation.Notification,
-                        title: "Directory Digest - Concatenate Entirety (Retry)",
+                        title: "Directory Digest - Create Markdown (Retry)",
                         cancellable: false
-                    }, async (progress) => {
+                    }, async (progress: vscode.Progress<{ message?: string; increment?: number }>) => {
                         progress.report({ message: "Retrying directory concatenation..." });
                         await appendAllToOutputDir(targetDir!);
                     });

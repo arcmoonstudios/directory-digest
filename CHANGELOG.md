@@ -154,7 +154,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### v0.3.0 Added
 
-- The "Concatenate Entirety" command now mirrors the "Combine Files" experience but writes
+- The "Create Markdown" command now mirrors the "Combine Files" experience but writes
   structured Markdown output files (tree `.md` and per-directory `.md` files). Each file entry
   is rendered using a `### File: {path}` header and a language-tagged fenced code block. Files
   are included in alphabetical order by their relative path.
@@ -164,7 +164,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### v0.3.0 Changed
 
-- The output directory name for Concatenate Entirety is now `.{directoryName}` (rather than `.MyDirFiles`), with a top-level `tree` file of `{directoryName}.md` and per-directory Markdown files.
+- The output directory name for Create Markdown is now `.{directoryName}` (rather than `.MyDirFiles`), with a top-level `tree` file of `{directoryName}.md` and per-directory Markdown files.
 - `directoryDigest.maxDepth` is now inclusive: a value of `10` includes levels 0..9 in traversal.
 
 ### v0.3.0 Fixed

@@ -48,12 +48,21 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: vsix
+      - name: Validate VSCE_PAT secret
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          if [ -z "$VSCE_PAT" ]; then
+            echo "Missing VSCE_PAT secret. Add it to repository secrets as VSCE_PAT. Aborting."
+            exit 2
+          fi
       - name: Publish VSIX with vsce
+        # Put the secret here at the step-level to avoid job-level 'context access might be invalid' warnings
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
           pnpm install -g @vscode/vsce
-          # find the artifact file and publish via vsce using token in secret
+          # find the artifact file and publish via vsce using token in env
           VSIX_FILE=$(ls DirectoryDigest-*.vsix | head -n 1 || true)
           if [ -z "$VSIX_FILE" ]; then
             echo "VSIX file not found"
