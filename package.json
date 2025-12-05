@@ -46,6 +46,7 @@
     "clean-logs": "rimraf .vscode-test ghlogs run-*.zip actions-*.zip || true",
     "install-hooks": "node ./scripts/install-hooks.js",
     "prepare": "node ./scripts/install-hooks.js",
+    "package:vsix": "node ./scripts/package-vsix.js",
     "build-and-show": "pnpm run compile && dir out"
   },
   "packageManager": "pnpm@10.24.0",
