@@ -3,6 +3,8 @@ const { execSync } = require('child_process');
 const { existsSync } = require('fs');
 
 try {
+  // Scan for obvious tokens in staged files before continuing the commit
+  execSync('node ./scripts/check-for-token-commits.js', { stdio: 'inherit' });
   // Clean logs and test artifacts before commit
   if (existsSync('package.json')) {
     execSync('pnpm run -w -s clean-logs', { stdio: 'inherit' });
